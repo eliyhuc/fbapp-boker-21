@@ -11,7 +11,7 @@ import {
 } from "react-native";
 
 import { database } from "./src/firebaseConfig";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, getDocs } from "firebase/firestore";
 
 const App = () => {
   const [productName, setProductName] = useState("");
@@ -20,6 +20,7 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [shoppingList, setShoppingList] = useState([]);
 
+  //CREATE
   const addProduct = async () => {
     setIsLoading(true);
     if (productName !== "" && productPrice > 0 && units > 0) {
@@ -34,9 +35,10 @@ const App = () => {
           units: units,
           generalSum: sum
         });
-
-        console.log(docRef.id);
         setIsLoading(false);
+        setProductName("")
+        setProductPrice(0)
+        setUnits(1)
       } catch (error) {
         setIsLoading(false);
         Alert.alert(error.message);
@@ -47,6 +49,29 @@ const App = () => {
     }
   };
 
+  //READ
+  const loadProducts = async() => {
+    setIsLoading(true)
+    try {  
+      const shoppingRef = collection(database, "shopping");
+      const shoplist = await getDocs(shoppingRef);
+      setShoppingList(shoplist.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data()
+      })))
+      setIsLoading(false);
+    } catch (error) {
+        setIsLoading(false);
+        Alert.alert(error.message);
+    }
+  }
+
+  useEffect(() => {
+    loadProducts();
+  },[])
+
+
+  console.log(shoppingList);
   return (
     <View style={styles.container}>
       <View style={styles.form_container}>
