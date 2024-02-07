@@ -11,7 +11,8 @@ import {
 } from "react-native";
 
 import { database } from "./src/firebaseConfig";
-import { addDoc, collection, getDocs } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs } from "firebase/firestore";
+import ShoppingItem from "./src/ShoppingItem";
 
 const App = () => {
   const [productName, setProductName] = useState("");
@@ -35,6 +36,7 @@ const App = () => {
           units: units,
           generalSum: sum
         });
+        loadProducts();
         setIsLoading(false);
         setProductName("")
         setProductPrice(0)
@@ -59,6 +61,7 @@ const App = () => {
         id: doc.id,
         ...doc.data()
       })))
+
       setIsLoading(false);
     } catch (error) {
         setIsLoading(false);
@@ -70,8 +73,25 @@ const App = () => {
     loadProducts();
   },[])
 
+  //DELETE
+  const deleteProduct = async(id) => {
+    try {
+      
+      const productRef = doc(database, "shopping", id)
+      await deleteDoc(productRef)
 
-  console.log(shoppingList);
+      loadProducts();
+
+    } catch (error) {
+      Alert.alert(error.message)
+    }
+  }
+
+  const updateProduct = async(id) => {
+
+  }
+
+
   return (
     <View style={styles.container}>
       <View style={styles.form_container}>
@@ -121,12 +141,34 @@ const App = () => {
           </TouchableOpacity>
         )}
       </View>
-      <View style={styles.list_container}></View>
+      <View style={styles.list_container}>
+          <FlatList
+            style={{width:'100%'}}
+            data={shoppingList}
+            keyExtractor={item => item.id}
+            renderItem={itemRow => 
+              <ShoppingItem
+                updateProduct={updateProduct}
+                product={itemRow.item}
+                deleteProduct={deleteProduct}
+              />
+            }
+          />
+      </View>
+      <View style={styles.sum_container}>
+      
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  sum_container:{
+       width: "100%",
+      height: "10%",
+      padding: 10,
+      backgroundColor:'#000'
+  },
   input: {
     width: "100%",
     backgroundColor: "#fff",
@@ -143,12 +185,13 @@ const styles = StyleSheet.create({
   },
   form_container: {
     width: "100%",
-    height: "20%",
-    padding: 10,
+    height: "22%",
+    padding: 20,
   },
   list_container: {
     width: "100%",
-    height: "80%",
+    height: "68%",
+    padding:20
   },
   container: {
     flex: 1,
