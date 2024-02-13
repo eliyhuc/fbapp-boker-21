@@ -55,7 +55,10 @@ const ShoppingItem = (props) => {
                         </Text>
 
                         <MCI
-                            onPress={() => { props.updateProduct(props.product.id) }}
+                            onPress={() => { 
+                                props.updateProduct(props.product.id, units, generalSum);
+                                setIsEdit(false)
+                            }}
                             size={24}
                             color='#00cc99'
                             name="content-save" />
